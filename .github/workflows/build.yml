@@ -67,4 +67,4 @@ jobs:
       - name: Test pypi publish
         env:
           MATURIN_PASSWORD: ${{ secrets.PYPI_TEST_PASSWORD }}
-        run: maturin publish --username milk-zheng --repository_url https://test.pypi.org/legacy/
+        run: maturin publish --username milk-zheng --repository-url https://test.pypi.org/legacy/
