@@ -28,8 +28,8 @@ jobs:
         run: maturin build --release --strip --interpreter
 
       - uses: actions/upload-artifact@v2
-          with:
-            path: target/wheels/*.tar.gz
+        with:
+          path: target/wheels/*.tar.gz
 
   build_wheels:
     runs-on: ${{ matrix.os }}
@@ -79,8 +79,8 @@ jobs:
         run: pip install target/wheels/neighborhood_analysis*.whl
 
       - uses: actions/upload-artifact@v2
-          with:
-            path: target/wheels/*.whl
+        with:
+          path: target/wheels/*.whl
 
   release_pypi:
       runs-on: ubuntu-latest
