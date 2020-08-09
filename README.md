@@ -1,5 +1,7 @@
 # Neighborhood analysis
 
+![Build](https://github.com/Mr-Milk/neighborhood_analysis/workflows/Build/badge.svg)
+
 A python version of neighborhood analysis, purposed in [histocat](https://www.nature.com/articles/nmeth.4391). The analysis is 
 to profile cell-cell interaction.
 
