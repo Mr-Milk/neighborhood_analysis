@@ -87,16 +87,16 @@ jobs:
       - name: PyPi publish
         if: github.event_name == 'release' && github.event.action == 'created'
         uses: pypa/gh-action-pypi-publish@master
-          with:
-            user: milk-zheng
-            password: ${{ secrets.pypi_password }}
-            packages_dir: ./target/wheels/artifact/*
+        with:
+          user: milk-zheng
+          password: ${{ secrets.pypi_password }}
+          packages_dir: ./target/wheels/artifact/*
 
       - name: Test pypi publish
         if: "contains(toJSON(github.event.commits.*.message), '[test pypi]')"
         uses: pypa/gh-action-pypi-publish@master
-          with:
-            user: milk-zheng
-            password: ${{ secrets.pypi_test_password }}
-            packages_dir: ./target/wheels/artifact/*
-            repository_url: https://test.pypi.org/legacy/
+        with:
+          user: milk-zheng
+          password: ${{ secrets.pypi_test_password }}
+          packages_dir: ./target/wheels/artifact/*
+          repository_url: https://test.pypi.org/legacy/
