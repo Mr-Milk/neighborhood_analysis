@@ -90,7 +90,7 @@ jobs:
         with:
           user: milk-zheng
           password: ${{ secrets.pypi_password }}
-          packages_dir: ./target/wheels/artifact/*
+          packages_dir: ./target/wheels/artifact/
 
       - name: Test pypi publish
         if: "contains(toJSON(github.event.commits.*.message), '[test pypi]')"
