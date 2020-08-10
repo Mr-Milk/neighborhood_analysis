@@ -71,16 +71,16 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          path: ./target/wheels/
+          path: ./wheels/
 
       - name: List wheels
-        run: find ./target/wheels/
+        run: find ./wheels/
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: target/wheels/*
+          files: ./wheels/artifact/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
