@@ -39,16 +39,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PyPi publish
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         env:
           MATURIN_PASSWORD: ${{ secrets.pypi_password }}
-        run: maturin publish --release --strip --interpreter --username milk-zheng
+        run: maturin publish --interpreter --username milk-zheng
 
       - name: Test PyPi publish
         if: "contains(toJSON(github.event.commits.*.message), '[test pypi]')"
         env:
           MATURIN_PASSWORD: ${{ secrets.pypi_test_password }}
-        run: maturin publish --release --strip --interpreter --username milk-zheng --repository-url https://test.pypi.org/legacy/
+        run: maturin publish --interpreter --username milk-zheng --repository-url https://test.pypi.org/legacy/
 
 
   build_wheels:
@@ -105,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PyPi publish
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         env:
           MATURIN_PASSWORD: ${{ secrets.pypi_password }}
         run: maturin publish --no-sdist --interpreter python${{matrix.python_version}} --username milk-zheng
