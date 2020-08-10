@@ -32,11 +32,19 @@ jobs:
 
       - name: Build Python package
         if: matrix.os != 'ubuntu-latest' && matrix.python_version != 3.7
-        run: maturin build --release --strip --no-dist --interpreter python${{matrix.python_version}}
+        run: maturin build --release --strip --no-sdist --interpreter python${{matrix.python_version}}
 
       - name: Build sdist
         if: matrix.os == 'ubuntu-latest' && matrix.python_version == 3.7
         run: maturin build --release --strip --interpreter python3.7
+
+      - name: List wheels
+        if: matrix.os == 'windows-latest'
+        run: dir target\wheels\
+
+      - name: List wheels
+        if:  matrix.os != 'windows-latest'
+        run: find ./target/wheels/
 
       - name: Install wheels on Windows
         if:  matrix.os == 'windows-latest'
