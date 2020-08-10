@@ -7,7 +7,6 @@ license = "MIT"
 
 [package.metadata.maturin]
 classifier = [
-    "Development Status :: Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "License :: OSI Approved :: MIT License",
