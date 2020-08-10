@@ -71,27 +71,32 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          path: ./wheels/
+          path: ./target/wheels/
 
       - name: List wheels
-        run: find ./wheels/
+        run: find ./target/wheels/
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./wheels/artifact/*
+          files: ./target/wheels/artifact/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PyPi publish
         if: github.event_name == 'release' && github.event.action == 'created'
-        env:
-          MATURIN_PASSWORD: ${{ secrets.pypi_password }}
-        run: maturin publish --username milk-zheng
+        uses: pypa/gh-action-pypi-publish@master
+          with:
+            user: milk-zheng
+            password: ${{ secrets.pypi_password }}
+            packages_dir: ./target/wheels/artifact/*
 
       - name: Test pypi publish
         if: "contains(toJSON(github.event.commits.*.message), '[test pypi]')"
-        env:
-          MATURIN_PASSWORD: ${{ secrets.PYPI_TEST_PASSWORD }}
-        run: maturin publish --username milk-zheng --repository-url https://test.pypi.org/legacy/
+        uses: pypa/gh-action-pypi-publish@master
+          with:
+            user: milk-zheng
+            password: ${{ secrets.pypi_test_password }}
+            packages_dir: ./target/wheels/artifact/*
+            repository_url: https://test.pypi.org/legacy/
