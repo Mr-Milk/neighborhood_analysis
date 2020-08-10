@@ -15,15 +15,33 @@ The wheels are built for Windows, MacOS, Linux in 64bit, and Python version 3.5,
 
 Requirements: Python >= 3.5
 
-### pypi
+### From pypi
 
-```python
+Normally, there should be a compatible wheels for your systems. Just run:
+
+```shell script
 pip install neighborhood_analysis
 ```
 
+If not, it will try to compile from source, you need to install dependencies.
+
+```shell script
+# for windows
+choco install rustup.install
+# for Unix
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+pip install maturin
+
+pip install neighborhood_analysis
+```
+
+
 ### From source
 
-```python
+Assume you have all the above dependencies, clone the repo, and then run:
+
+```shell script
 pip install .
 ```
 

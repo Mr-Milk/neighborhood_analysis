@@ -34,14 +34,6 @@ jobs:
       - name: Build Python package
         run: maturin build --release --strip --interpreter python${{matrix.python_version}}
 
-      - name: List wheels
-        if: matrix.os == 'windows-latest'
-        run: dir target\wheels\
-
-      - name: List wheels
-        if:  matrix.os != 'windows-latest'
-        run: find ./target/wheels/
-
       - name: Install wheels on Windows
         if:  matrix.os == 'windows-latest'
         run: pip install --find-links=target\wheels neighborhood_analysis
@@ -50,11 +42,45 @@ jobs:
         if:  matrix.os != 'windows-latest'
         run: pip install target/wheels/neighborhood_analysis*.whl
 
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./target/wheels/
+
+  publish_release:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install maturin
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./target/wheels/
+
+      - name: List wheels
+        run: find ./target/wheels/
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: target/wheels/neighborhood_analysis*.whl
+          files: target/wheels/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,6 +91,7 @@ jobs:
         run: maturin publish --username milk-zheng
 
       - name: Test pypi publish
+        if: "contains(toJSON(github.event.commits.*.message), '[test pypi]')"
         env:
           MATURIN_PASSWORD: ${{ secrets.PYPI_TEST_PASSWORD }}
         run: maturin publish --username milk-zheng --repository-url https://test.pypi.org/legacy/
