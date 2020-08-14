@@ -17,7 +17,7 @@ Requirements: Python >= 3.5
 
 ### From pypi
 
-Normally, there should be a compatible wheels for your systems. Just run:
+Normally, there should be a compatible wheel for your systems. Just run:
 
 ```shell script
 pip install neighborhood_analysis
@@ -49,7 +49,7 @@ pip install .
 
 ```python
 import numpy as np
-from neighborhood_analysis import CellCombs, get_neighbors
+from neighborhood_analysis import CellCombs, get_neighbors, comb_bootstrap
 
 # Get 10000 points, represent cell location
 points = np.random.randint(0, 1000, (10000, 2))
@@ -66,6 +66,11 @@ neighbors = get_neighbors(points, 10.0)
 cc = CellCombs(types)
 cc.bootstrap(types, neighbors)
 # On my dual-core mac, this step takes 6~7 seconds.
+
+X = [bool(i) for i in np.random.choice([True, False], 10000)]
+Y = [bool(i) for i in np.random.choice([True, False], 10000)]
+# The types must be a list of bool
+v = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ```
 
@@ -84,6 +89,21 @@ def get_neighbors(points, r):
             A dictionary of the index of every points, with the index of its neighbors
 
     """
+def comb_bootstrap(x_status, y_status, neighbors, times=500, ignore_self=False):
+    """Bootstrap between two types
+    
+        Args:
+            x_status: List[bool]; If cell is type x
+            y_status: List[bool]; If cell is type y
+            neighbors: Dict[int, List[int]]; eg. {1:[4,5], 2:[6,7]}, cell at index 1 has neighbor cells from index 4 and 5
+            times: int (500); How many times to perform bootstrap
+            ignore_self: bool (False); Whether to consider self as a neighbor
+        
+        Return:
+            A dictionary of the index of every points, with the index of its neighbors
+
+    """
+
 
 class CellCombs:
 
@@ -99,7 +119,7 @@ class CellCombs:
 
         """
     
-    def bootstrap(self, types, neighbors, times=500, pval=0.05, method="pval"):
+    def bootstrap(self, types, neighbors, times=500, pval=0.05, method="pval", ignore_self=False):
         """Bootstrap functions
         
             If method is 'pval', 1.0 means association, -1.0 means avoidance.
@@ -111,6 +131,7 @@ class CellCombs:
                 times: int (500); How many times to perform bootstrap
                 pval: float (0.05); The threshold of p-value
                 method: str ('pval'); 'pval' or 'zscore'
+                ignore_self: bool (False); Whether to consider self as a neighbor
             
             Return:
                 List of tuples, eg.(['a', 'b'], 1.0), the type a and type b has a relationship as association

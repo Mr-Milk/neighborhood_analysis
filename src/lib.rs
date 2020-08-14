@@ -18,6 +18,7 @@ use pyo3::wrap_pyfunction;
 fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CellCombs>()?;
     m.add_wrapped(wrap_pyfunction!(get_neighbors))?;
+    m.add_wrapped(wrap_pyfunction!(comb_bootstrap))?;
     Ok(())
 }
 
@@ -29,6 +30,7 @@ fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
 ///
 /// Return:
 ///     A dictionary of the index of every points, with the index of its neighbors
+///
 #[pyfunction]
 fn get_neighbors(points: Vec<(f64, f64)>, r: f64)
     -> HashMap<usize, Vec<usize>>{
@@ -39,6 +41,80 @@ fn get_neighbors(points: Vec<(f64, f64)>, r: f64)
     }
 
     result
+}
+
+/// Bootstrap between two types
+///
+/// Args:
+///     x_status: List[bool]; If cell is type x
+///     y_status: List[bool]; If cell is type y
+///     neighbors: Dict[int, List[int]]; eg. {1:[4,5], 2:[6,7]}, cell at index 1 has neighbor cells from index 4 and 5
+///     times: int (500); How many times to perform bootstrap
+///     ignore_self: bool (False); Whether to consider self as a neighbor
+///
+/// Return:
+///     A dictionary of the index of every points, with the index of its neighbors
+///
+#[pyfunction]
+fn comb_bootstrap(
+    py: Python,
+    x_status: PyObject,
+    y_status: PyObject,
+    neighbors: PyObject,
+    times: Option<usize>,
+    ignore_self: Option<bool>,
+) -> PyResult<f64> {
+
+    let x: Vec<bool> = match x_status.extract(py) {
+            Ok(data) => data,
+            Err(_) => {
+                return Err(PyValueError::py_err("Can't resolve `x_status`, should be list of bool."))
+            }
+        };
+
+    let y: Vec<bool> = match y_status.extract(py) {
+            Ok(data) => data,
+            Err(_) => {
+                return Err(PyValueError::py_err("Can't resolve `y_status`, should be list of bool."))
+            }
+        };
+
+    let neighbors_data: HashMap<usize, Vec<usize>> = match neighbors.extract(py) {
+            Ok(data) => data,
+            Err(_) => {
+                return Err(PyValueError::py_err("Can't resolve `neighbors`, should be a dict."))
+            }
+        };
+
+    let times = match times {
+            Some(data) => data,
+            None => 500
+        };
+
+    let ignore_self = match ignore_self {
+            Some(data) => data,
+            None => false
+        };
+
+    let real: f64 = comb_count_neighbors(&x, &y, &neighbors_data, ignore_self) as f64;
+
+    let perm_counts: Vec<usize> = (0..times).into_par_iter().map(|_| {
+        let mut rng = thread_rng();
+        let mut shuffle_y = y.to_owned();
+        shuffle_y.shuffle(&mut rng);
+        let perm_result = comb_count_neighbors(
+            &x,
+            &shuffle_y,
+            &neighbors_data,
+            ignore_self);
+        perm_result
+        })
+        .collect();
+
+    let m = mean(&perm_counts);
+    let sd = std(&perm_counts);
+
+    Ok((real - m) / sd)
 }
 
 /// Constructor function
@@ -124,6 +200,7 @@ impl CellCombs {
     ///     times: int (500); How many times to perform bootstrap
     ///     pval: float (0.05); The threshold of p-value
     ///     method: str ('pval'); 'pval' or 'zscore'
+    ///     ignore_self: bool (False); Whether to consider self as a neighbor
     ///
     /// Return:
     ///     List of tuples, eg.(['a', 'b'], 1.0), the type a and type b has a relationship as association
@@ -135,6 +212,7 @@ impl CellCombs {
                  times: Option<usize>,
                  pval: Option<f64>,
                  method: Option<&str>,
+                 ignore_self: Option<bool>,
     ) -> PyResult<PyObject> {
 
         let types_data: Vec<&str> = match types.extract(py) {
@@ -165,6 +243,11 @@ impl CellCombs {
             None => "pval"
         };
 
+        let ignore_self = match ignore_self {
+            Some(data) => data,
+            None => false
+        };
+
         let cellcombs: Vec<Vec<&str>> = match self.cell_combs.extract(py) {
             Ok(data) => data,
             Err(_) => {
@@ -182,7 +265,8 @@ impl CellCombs {
             &types_data,
             &neighbors_data,
             &cellcombs,
-            &cellrelatetionship
+            &cellrelatetionship,
+            ignore_self
         );
 
         let mut simulate_data = cellcombs.iter()
@@ -197,7 +281,8 @@ impl CellCombs {
                 &shuffle_types,
                 &neighbors_data,
             &cellcombs,
-            &cellrelatetionship);
+            &cellrelatetionship,
+            ignore_self);
             perm_result
             })
             .collect();
@@ -239,7 +324,7 @@ impl CellCombs {
                 results.push((k.to_owned(), sigv));
             } else {
                 let m = mean_f(v);
-                let sd = std(v);
+                let sd = std_f(v);
                 if sd != 0.0 {
                     results.push((k.to_owned(), (real - m) / sd));
                     //*results.get_mut(k).unwrap() += (real - m) / sd;
@@ -262,7 +347,8 @@ fn count_neighbors<'a>(
                    types: &Vec<&str>,
                    neighbors: &HashMap<usize, Vec<usize>>,
                    cell_combs: &Vec<Vec<&'a str>>,
-                   cell_relationships: &HashMap<&'a str, Vec<Vec<&'a str>>>,)
+                   cell_relationships: &HashMap<&'a str, Vec<Vec<&'a str>>>,
+                   ignore_self: bool)
                -> HashMap<Vec<&'a str>, f64> {
     let mut storage = cell_combs.iter()
         .map(|comb| (comb.to_owned(), vec![]))
@@ -270,7 +356,17 @@ fn count_neighbors<'a>(
 
     for (k, v) in neighbors.iter() {
         let cent_type = types[*k];
-        let neigh_type: Counter<_> = v.iter().map(|i| types[*i]).collect::<Counter<_>>();
+        let neigh_type: Counter<_> = {
+            if ignore_self {
+                v.iter()
+                    .filter_map(|i| if i != k { Some(types[*i]) } else { None })
+                    .collect::<Counter<_>>()
+            } else {
+                v.iter()
+                    .map(|i| types[*i])
+                    .collect::<Counter<_>>()
+            }
+        };
         for comb in cell_relationships[cent_type].iter() {
             let counts = neigh_type.get(comb[1]).unwrap_or(&0);
             match storage.get_mut(comb) {
@@ -288,4 +384,32 @@ fn count_neighbors<'a>(
     }
 
     results
+}
+
+fn comb_count_neighbors(
+    x: &Vec<bool>,
+    y: &Vec<bool>,
+    neighbors: &HashMap<usize, Vec<usize>>,
+    ignore_self: bool,
+) -> usize {
+
+    let mut count: usize = 0;
+
+    for (k, v) in neighbors.iter() {
+        if x[*k] {
+            if ignore_self {
+                for (i, c) in v.iter().enumerate() {
+                    if i != *k {
+                        if y[*c] { count += 1 }
+                    }
+                }
+            } else {for c in v.iter() {
+                    if y[*c] { count += 1 }
+                }
+            }
+        }
+    }
+
+    count
+
 }
