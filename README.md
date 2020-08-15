@@ -17,7 +17,7 @@ Requirements: Python >= 3.5
 
 ### From pypi
 
-Normally, there should be a compatible wheel for your systems. Just run:
+Normally, there should be a compatible wheel for your system. Just run:
 
 ```shell script
 pip install neighborhood_analysis
@@ -64,19 +64,19 @@ points = [(x, y) for (x, y) in points]
 neighbors = get_neighbors(points, 10.0)
 
 cc = CellCombs(types)
-cc.bootstrap(types, neighbors)
+result = cc.bootstrap(types, neighbors)
 # On my dual-core mac, this step takes 6~7 seconds.
 
 X = [bool(i) for i in np.random.choice([True, False], 10000)]
 Y = [bool(i) for i in np.random.choice([True, False], 10000)]
 # The types must be a list of bool
-v = comb_bootstrap(X, Y, neighbors, ignore_self=True)
+z_score = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ```
 
 ## Documentation
 
-```pythonstub
+```python
 
 def get_neighbors(points, r):
     """A utility function to search for neighbors
@@ -89,8 +89,13 @@ def get_neighbors(points, r):
             A dictionary of the index of every points, with the index of its neighbors
 
     """
+
+
 def comb_bootstrap(x_status, y_status, neighbors, times=500, ignore_self=False):
     """Bootstrap between two types
+
+        If you want to test co-localization between protein X and Y, first determine if the cell is X-positive
+        and/or Y-positive. True is considered as positive and will be counted.
     
         Args:
             x_status: List[bool]; If cell is type x
@@ -100,7 +105,7 @@ def comb_bootstrap(x_status, y_status, neighbors, times=500, ignore_self=False):
             ignore_self: bool (False); Whether to consider self as a neighbor
         
         Return:
-            A dictionary of the index of every points, with the index of its neighbors
+            The z-score for the spatial relationship between X and Y
 
     """
 

@@ -45,6 +45,9 @@ fn get_neighbors(points: Vec<(f64, f64)>, r: f64)
 
 /// Bootstrap between two types
 ///
+/// If you want to test co-localization between protein X and Y, first determine if the cell is X-positive
+/// and/or Y-positive. True is considered as positive and will be counted.
+///
 /// Args:
 ///     x_status: List[bool]; If cell is type x
 ///     y_status: List[bool]; If cell is type y
@@ -53,7 +56,7 @@ fn get_neighbors(points: Vec<(f64, f64)>, r: f64)
 ///     ignore_self: bool (False); Whether to consider self as a neighbor
 ///
 /// Return:
-///     A dictionary of the index of every points, with the index of its neighbors
+///     The z-score for the spatial relationship between X and Y
 ///
 #[pyfunction]
 fn comb_bootstrap(
