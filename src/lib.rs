@@ -165,14 +165,14 @@ impl CellCombs {
         for i1 in uni.to_owned() {
             relationships.insert(i1, vec![]);
             for i2 in uni.to_owned() {
-                if !&order_data {
+                if order_data {
                     combs.push(vec![i1, i2]);
                 }
                 relationships.get_mut(i1).unwrap().push(vec![i1, i2]);
             }
         }
 
-        if order_data {
+        if !order_data {
             let end: usize = uni.len();
             for (i, e) in uni.to_owned().iter().enumerate() {
                 for t in i..end {
