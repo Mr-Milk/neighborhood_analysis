@@ -4,20 +4,17 @@ from neighborhood_analysis import CellCombs, get_neighbors, comb_bootstrap
 
 from time import time
 
-types = ['a', 'b', 'c', 'd', 'e']
+types = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 points = np.random.randint(0, 1000, (10000, 2))
 corr_types = np.random.choice(types, 10000)
 points = [(x, y) for (x, y) in points]
 neighbors = get_neighbors(points, 10.0)
 
 start = time()
-cc = CellCombs(types)
-cc.bootstrap(corr_types, neighbors, ignore_self=True)
-print("order=False:", cc.cell_combs)
 
-cc = CellCombs(types, True)
-cc.bootstrap(corr_types, neighbors, ignore_self=True)
-print("order=True:", cc.cell_combs)
+cc = CellCombs(types, False)
+results = cc.bootstrap(corr_types, neighbors, ignore_self=True)
+print(results)
 
 end = time()
 print(f"used {(end-start):.2f}s")

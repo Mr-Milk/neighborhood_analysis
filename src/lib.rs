@@ -317,12 +317,12 @@ impl CellCombs {
                 let gt: f64 = gt as f64 / (times.to_owned() as i32 + 1) as f64;
                 let lt: f64 = lt as f64 / (times.to_owned() as i32 + 1) as f64;
                 let dir: f64 = (gt < lt) as i32 as f64;
-                let udir: f64 = -dir;
+                let udir: f64 = !(gt < lt) as i32 as f64;
                 let p: f64 = gt * dir + lt * udir;
                 let sig: f64 = (p < pval) as i32 as f64;
                 let sigv: f64 = sig * (dir - 0.5).signum();
-                //println!("{:?} {:?} {:?}", dir, p, sig);
-                //println!("{:?} {:?}", k, sigv);
+                // println!("{:?} {:?} {:?} {:?}", dir, udir, p, sig);
+                // println!("{:?} {:?}", k, sigv);
                 // *results.get_mut(k).unwrap() += sigv;
                 results.push((k.to_owned(), sigv));
             } else {
