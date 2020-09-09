@@ -5,6 +5,7 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 use itertools::Itertools;
 use kdbush::KDBush;
+use rstar::{RTree, RTreeObject, AABB};
 use std::collections::HashMap;
 use counter::Counter;
 use rayon::prelude::*;
@@ -17,12 +18,13 @@ use pyo3::wrap_pyfunction;
 #[pymodule]
 fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CellCombs>()?;
-    m.add_wrapped(wrap_pyfunction!(get_neighbors))?;
+    m.add_wrapped(wrap_pyfunction!(get_point_neighbors))?;
+    m.add_wrapped(wrap_pyfunction!(get_bbox_neighbors))?;
     m.add_wrapped(wrap_pyfunction!(comb_bootstrap))?;
     Ok(())
 }
 
-/// A utility function to search for neighbors
+/// A utility function to search for point neighbors using kd-tree
 ///
 /// Args:
 ///     points: List[tuple(float, float)]; Two dimension points
@@ -32,15 +34,112 @@ fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
 ///     A dictionary of the index of every points, with the index of its neighbors
 ///
 #[pyfunction]
-fn get_neighbors(points: Vec<(f64, f64)>, r: f64)
+fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64)
     -> HashMap<usize, Vec<usize>>{
     let tree = KDBush::create(points.to_owned(), kdbush::DEFAULT_NODE_SIZE); // make an index
-    let mut result: HashMap<usize, Vec<usize>> = (0..points.len()).map(|i| (i, vec![])).collect();
-    for (i, p) in points.iter().enumerate() {
-        tree.within(p.0, p.1, r, |id| result.get_mut(&i).unwrap().push(id));
-    }
+    let result: HashMap<usize, Vec<usize>> = points.par_iter().enumerate().map(|(i ,p)| {
+        let mut neighbors:Vec<usize> = vec![];
+        tree.within(p.0, p.1, r, |id| neighbors.push(id));
+        (i, neighbors)
+    }).collect();
 
     result
+}
+
+// customize object to insert in to R-tree
+struct Rect
+{
+    minx: f64,
+    miny: f64,
+    maxx: f64,
+    maxy: f64,
+    index: usize,
+}
+
+impl Rect {
+    fn new(bbox:(f64, f64, f64, f64), index: usize) -> Rect {
+        Rect{
+            minx: bbox.0,
+            miny: bbox.1,
+            maxx: bbox.2,
+            maxy: bbox.3,
+            index
+        }
+    }
+}
+
+impl RTreeObject for Rect
+{
+    type Envelope = AABB<[f64; 2]>;
+
+    fn envelope(&self) -> Self::Envelope
+    {
+        AABB::from_corners([self.minx, self.miny], [self.maxx, self.maxy])
+    }
+}
+
+/// A utility function to search for bbox neighbors using r-tree
+///
+/// Args:
+///     bbox_list: List[tuple(float, float, float, float)]; The minimum bounding box of any polygon
+///             (minx, miny, maxx, maxy)
+///     expand: float; The expand unit
+///     scale: float; The scale fold number
+///
+/// Return:
+///     A dictionary of the index of every rect, with the index of its neighbors
+///
+#[pyfunction]
+fn get_bbox_neighbors(bbox_list: Vec<(f64, f64, f64, f64)>, expand: Option<f64>, scale: Option<f64>)
+-> HashMap<usize, Vec<usize>> {
+    let mut expand_na: bool = true;
+    let expand: f64 = match expand {
+            Some(data) => {
+                expand_na = false;
+                data
+            },
+            None => 0.0
+        };
+
+    let scale: f64 = match scale {
+            Some(data) => data,
+            None => 1.0
+        };
+
+
+    let aabb: Vec<Rect> = bbox_list.par_iter().enumerate().map(|(i, b)|
+        {
+            Rect::new(b.to_owned(), i)
+        }
+    ).collect();
+    let tree: RTree<Rect> = RTree::<Rect>::bulk_load(aabb);
+    let search_aabb: Vec<Rect> = {
+        if expand_na == false {
+            let expand_aabb: Vec<Rect> = bbox_list.par_iter().enumerate().map(|(i, b)|
+                {
+                    Rect::new((b.0 - expand, b.1 - expand, b.2 + expand, b.3 + expand), i)
+                }
+            ).collect();
+            expand_aabb
+        } else {
+            let scale_aabb: Vec<Rect> = bbox_list.par_iter().enumerate().map(|(i, b)|
+                {
+                    let xexpand: f64 = (b.2 - b.0) * (scale - 1.0);
+                    let yexpand: f64 = (b.3 - b.1) * (scale - 1.0);
+                    Rect::new((b.0 - xexpand, b.1 - yexpand, b.2 + xexpand, b.3 + yexpand), i)
+                }
+            ).collect();
+            scale_aabb
+        }};
+    let result: HashMap<usize, Vec<usize>> = search_aabb.par_iter().map(|rect| {
+        let envelop = rect.envelope();
+        let search_result: Vec<&Rect> = tree.locate_in_envelope_intersecting(&envelop).collect();
+        let neighbors: Vec<usize> = search_result.iter().map(|r| r.index).collect();
+        (rect.index, neighbors)
+    }).collect();
+
+    result
+
 }
 
 /// Bootstrap between two types

@@ -1,6 +1,6 @@
 import numpy as np
 import neighborhood_analysis as na
-from neighborhood_analysis import CellCombs, get_neighbors, comb_bootstrap
+from neighborhood_analysis import CellCombs, get_point_neighbors, get_bbox_neighbors,comb_bootstrap
 
 from time import time
 
@@ -8,7 +8,25 @@ types = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 points = np.random.randint(0, 1000, (10000, 2))
 corr_types = np.random.choice(types, 10000)
 points = [(x, y) for (x, y) in points]
-neighbors = get_neighbors(points, 10.0)
+
+bbox = []
+for _ in range(100):
+    ix1, ix2 = np.random.choice(range(len(points)), 2)
+    if points[ix1][0] < points[ix2][0]:
+        bbox.append((*points[ix1], *points[ix2]))
+    else:
+        bbox.append((*points[ix2], *points[ix1]))
+
+start = time()
+neighbors = get_bbox_neighbors(bbox, 2)
+end = time()
+print(f"search bbox neighbors used {(end-start):.2f}s")
+
+
+start = time()
+neighbors = get_point_neighbors(points, 10.0)
+end = time()
+print(f"search point neighbors used {(end-start):.2f}s")
 
 start = time()
 

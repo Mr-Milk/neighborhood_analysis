@@ -1,6 +1,6 @@
 # Neighborhood analysis
 
-![Build](https://github.com/Mr-Milk/neighborhood_analysis/workflows/Build/badge.svg)
+![Build](https://github.com/Mr-Milk/neighborhood_analysis/workflows/Build/badge.svg) ![pypi](https://badgen.net/pypi/v/neighborhood_analysis)
 
 A python version of neighborhood analysis, purposed in [histocat](https://www.nature.com/articles/nmeth.4391). The analysis is 
 to profile cell-cell interaction.
@@ -49,7 +49,7 @@ pip install .
 
 ```python
 import numpy as np
-from neighborhood_analysis import CellCombs, get_neighbors, comb_bootstrap
+from neighborhood_analysis import CellCombs, get_point_neighbors, comb_bootstrap
 
 # Get 10000 points, represent cell location
 points = np.random.randint(0, 1000, (10000, 2))
@@ -61,7 +61,7 @@ types = np.random.choice(types_pool, 10000)
 # Find cell neighbors at radius set at 10
 # The points must be a list of tuple, otherwise it will raise TypeError
 points = [(x, y) for (x, y) in points]
-neighbors = get_neighbors(points, 10.0)
+neighbors = get_point_neighbors(points, 10.0)
 
 cc = CellCombs(types)
 result = cc.bootstrap(types, neighbors)
@@ -78,7 +78,7 @@ z_score = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ```python
 
-def get_neighbors(points, r):
+def get_point_neighbors(points, r):
     """A utility function to search for neighbors
     
         Args:
@@ -88,6 +88,21 @@ def get_neighbors(points, r):
         Return:
             A dictionary of the index of every points, with the index of its neighbors
 
+    """
+
+
+def get_bbox_neighbors(bbox, expand=0.0, scale=1.0):
+    """A utility function to search for bbox neighbors using r-tree
+    
+        Args:
+            bbox_list: List[tuple(float, float, float, float)]; 
+                The minimum bounding box of any polygon (minx, miny, maxx, maxy)
+            expand: float; The expand unit
+            scale: float; The scale fold number
+        
+        Return:
+            A dictionary of the index of every rect, with the index of its neighbors
+    
     """
 
 
