@@ -78,6 +78,17 @@ z_score = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ```python
 
+def get_bbox(points_collections):
+    """A utility function to return minimum bounding box list of polygons
+    
+        Args:
+            points_collections: List[List[(float, float)]]; List of 2d points collections
+        
+        Return:
+            A dictionary of the index of every points, with the index of its neighbors
+
+    """
+
 def get_point_neighbors(points, r):
     """A utility function to search for neighbors
     

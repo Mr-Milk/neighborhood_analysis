@@ -6,6 +6,7 @@ use rand::seq::SliceRandom;
 use itertools::Itertools;
 use kdbush::KDBush;
 use rstar::{RTree, RTreeObject, AABB};
+use spade::{BoundingRect};
 use std::collections::HashMap;
 use counter::Counter;
 use rayon::prelude::*;
@@ -18,11 +19,37 @@ use pyo3::wrap_pyfunction;
 #[pymodule]
 fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CellCombs>()?;
+    m.add_wrapped(wrap_pyfunction!(get_bbox))?;
     m.add_wrapped(wrap_pyfunction!(get_point_neighbors))?;
     m.add_wrapped(wrap_pyfunction!(get_bbox_neighbors))?;
     m.add_wrapped(wrap_pyfunction!(comb_bootstrap))?;
     Ok(())
 }
+
+
+/// A utility function to return minimum bounding box list of polygons
+///
+/// Args:
+///     points_collections: List[List[(float, float)]]; List of 2d points collections
+///
+/// Return:
+///     A dictionary of the index of every points, with the index of its neighbors
+///
+#[pyfunction]
+fn get_bbox(points_collections: Vec<Vec<(f64, f64)>>)
+-> Vec<(f64, f64, f64, f64)> {
+
+    let bbox: Vec<(f64, f64, f64, f64)> = points_collections.par_iter().map(|p| {
+        let points: Vec<[f64;2]> = p.iter().map(|ps| [ps.0, ps.1]).collect();
+        let rect = BoundingRect::from_points(points);
+        let lower: [f64;2] = rect.lower();
+        let upper: [f64;2] = rect.upper();
+        (lower[0], lower[1], upper[0], upper[1])
+    }).collect();
+
+    bbox
+}
+
 
 /// A utility function to search for point neighbors using kd-tree
 ///
