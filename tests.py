@@ -10,7 +10,7 @@ corr_types = np.random.choice(types, 10000)
 points = [(x, y) for (x, y) in points]
 
 polygons = []
-for _ in range(10000):
+for _ in range(100):
     ixs = np.random.choice(range(len(points)), 5)
     polygon = []
     for x in ixs:

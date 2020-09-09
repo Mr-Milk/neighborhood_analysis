@@ -431,24 +431,23 @@ impl CellCombs {
             let real = real_data[k];
 
             if method == "pval" {
-                let mut gt: i32 = 0;
-                let mut lt: i32 = 0;
+                let mut gt: f64 = 0.0;
+                let mut lt: f64 = 0.0;
                 for i in v.iter() {
                     if i >= &real {
-                        gt += 1
-                    } else if i <= &real {
-                        lt += 1
+                        gt += 1.0
+                    }
+                    if i <= &real {
+                        lt += 1.0
                     }
                 }
-                let gt: f64 = gt as f64 / (times.to_owned() as i32 + 1) as f64;
-                let lt: f64 = lt as f64 / (times.to_owned() as i32 + 1) as f64;
+                let gt: f64 = gt as f64 / (times.to_owned() as f64 + 1.0);
+                let lt: f64 = lt as f64 / (times.to_owned() as f64 + 1.0);
                 let dir: f64 = (gt < lt) as i32 as f64;
                 let udir: f64 = !(gt < lt) as i32 as f64;
                 let p: f64 = gt * dir + lt * udir;
                 let sig: f64 = (p < pval) as i32 as f64;
                 let sigv: f64 = sig * (dir - 0.5).signum();
-                // println!("{:?} {:?} {:?} {:?}", dir, udir, p, sig);
-                // println!("{:?} {:?}", k, sigv);
                 // *results.get_mut(k).unwrap() += sigv;
                 results.push((k.to_owned(), sigv));
             } else {
