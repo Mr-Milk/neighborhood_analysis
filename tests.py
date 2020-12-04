@@ -1,10 +1,10 @@
 import numpy as np
 import neighborhood_analysis as na
-from neighborhood_analysis import CellCombs, get_bbox, get_point_neighbors, get_bbox_neighbors,comb_bootstrap
+from neighborhood_analysis import CellCombs, get_bbox, get_point_neighbors, get_bbox_neighbors, comb_bootstrap
 
 from time import time
 
-types = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+types = [str(i) for i in range(30)]
 points = np.random.randint(0, 1000, (10000, 2))
 corr_types = np.random.choice(types, 10000)
 points = [(x, y) for (x, y) in points]
@@ -19,31 +19,31 @@ for _ in range(100):
 start = time()
 bbox = get_bbox(polygons)
 end = time()
-print(f"Get bbox used {(end-start):.2f}s")
+print(f"Get bbox used {(end-start):.5f}s")
 
 start = time()
 neighbors = get_bbox_neighbors(bbox, 2)
 end = time()
-print(f"search bbox neighbors used {(end-start):.2f}s")
+print(f"search bbox neighbors used {(end-start):.5f}s")
 
 
 start = time()
-neighbors = get_point_neighbors(points, 10.0)
+neighbors = get_point_neighbors(points, 5.0)
 end = time()
-print(f"search point neighbors used {(end-start):.2f}s")
+print(np.asarray([len(i) for i in neighbors]).mean())
+print(f"search point neighbors used {(end-start):.5f}s")
 
 start = time()
 
 cc = CellCombs(types, False)
-results = cc.bootstrap(corr_types, neighbors, ignore_self=True)
-print(results)
+results = cc.bootstrap(corr_types, neighbors, times=1000, ignore_self=True)
 
 end = time()
-print(f"used {(end-start):.2f}s")
+print(f"neighborhood used {(end-start):.5f}s")
 
 s1 = time()
 X = [bool(i) for i in np.random.choice([True, False], 10000)]
 Y = [bool(i) for i in np.random.choice([True, False], 10000)]
-v = comb_bootstrap(X, Y, neighbors, ignore_self=True)
+v = comb_bootstrap(X, Y, neighbors, times=1000, ignore_self=True)
 s2 = time()
-print(f"used {(s2-s1):.2f}s")
+print(f"marker co-exp used {(s2-s1):.5f}s")

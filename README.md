@@ -11,7 +11,7 @@ The safe parallelism has been implemented, so no need to do multiprocessing your
 
 ## Installation
 
-The wheels are built for Windows, MacOS, Linux in 64bit, and Python version 3.5, 3.6, 3.7, 3.8
+The wheels are built for Windows, MacOS, Linux in 64bit, and Python version 3.5, 3.6, 3.7, 3.8, 3.9
 
 Requirements: Python >= 3.5
 
@@ -76,97 +76,84 @@ z_score = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ## Documentation
 
+### Neighborhood_analysis
 ```python
-
-def get_bbox(points_collections):
-    """A utility function to return minimum bounding box list of polygons
-    
-        Args:
-            points_collections: List[List[(float, float)]]; List of 2d points collections
-        
-        Return:
-            A dictionary of the index of every points, with the index of its neighbors
-
-    """
-
-def get_point_neighbors(points, r):
-    """A utility function to search for neighbors
-    
-        Args:
-            points: List[tuple(float, float)]; Two dimension points
-            r: float; The search radius
-    
-        Return:
-            A dictionary of the index of every points, with the index of its neighbors
-
-    """
-
-
-def get_bbox_neighbors(bbox, expand=0.0, scale=1.0):
-    """A utility function to search for bbox neighbors using r-tree
-    
-        Args:
-            bbox_list: List[tuple(float, float, float, float)]; 
-                The minimum bounding box of any polygon (minx, miny, maxx, maxy)
-            expand: float; The expand unit
-            scale: float; The scale fold number
-        
-        Return:
-            A dictionary of the index of every rect, with the index of its neighbors
-    
-    """
-
-
-def comb_bootstrap(x_status, y_status, neighbors, times=500, ignore_self=False):
-    """Bootstrap between two types
-
-        If you want to test co-localization between protein X and Y, first determine if the cell is X-positive
-        and/or Y-positive. True is considered as positive and will be counted.
-    
-        Args:
-            x_status: List[bool]; If cell is type x
-            y_status: List[bool]; If cell is type y
-            neighbors: Dict[int, List[int]]; eg. {1:[4,5], 2:[6,7]}, cell at index 1 has neighbor cells from index 4 and 5
-            times: int (500); How many times to perform bootstrap
-            ignore_self: bool (False); Whether to consider self as a neighbor
-        
-        Return:
-            The z-score for the spatial relationship between X and Y
-
-    """
-
-
 class CellCombs:
 
     def __init__(self, types, order=False):
-        """Constructor function
-        
-            Args:
-             types: List[str]; All the type of cells in your research
-             order: bool (False); If False, the ('A', 'B') and ('A', 'B') is the same.
-            
-            Return:
-             self
+      """
+      Constructor function
 
-        """
+      Args:
+          types: List[str]; All the type of cells in your research
+          order: bool (False); If False, A->B and A<-B is the same.
+
+      Return:
+          self
+      """
     
     def bootstrap(self, types, neighbors, times=500, pval=0.05, method="pval", ignore_self=False):
-        """Bootstrap functions
-        
-            If method is 'pval', 1.0 means association, -1.0 means avoidance.
-            If method is 'zscore', results is the exact z-score value.
-            
-            Args:
-                types: List[str]; The type of all the cells
-                neighbors: Dict[int, List[int]]; eg. {1:[4,5], 2:[6,7]}, cell at index 1 has neighbor cells from index 4 and 5
-                times: int (500); How many times to perform bootstrap
-                pval: float (0.05); The threshold of p-value
-                method: str ('pval'); 'pval' or 'zscore'
-                ignore_self: bool (False); Whether to consider self as a neighbor
-            
-            Return:
-                List of tuples, eg.(['a', 'b'], 1.0), the type a and type b has a relationship as association
-        
-        """
+      """
+      Bootstrap functions
 
+      If method is 'pval', 1.0 means association, -1.0 means avoidance, 0.0 means insignificance.
+      If method is 'zscore', results is the exact z-score value.
+
+      Args:
+          types: List[str]; The type of all the cells
+          neighbors: List[List[int]]; eg. {1:[4,5], 2:[6,7]}, cell at index 1 has neighbor cells from index 4 and 5
+          times: int (500); How many times to perform bootstrap
+          pval: float (0.05); The threshold of p-value
+          method: str ('pval'); 'pval' or 'zscore'
+          ignore_self: bool (False); Whether to consider self as a neighbor
+
+      Return:
+          List of tuples, eg.(('a', 'b'), 1.0), the type a and type b has a relationship as association
+      """
 ```
+
+### Neighbors search utility functions
+
+```python
+def get_bbox(points_collections):
+  """
+  A utility function to return minimum bounding box list of polygons
+
+  Args:
+      points_collections: List[List[(float, float)]]; List of 2d points collections
+
+  Return:
+      A list of bounding box
+  """
+```
+
+```python
+def get_point_neighbors(points, r):
+  """
+  A utility function to search for point neighbors using kd-tree
+
+  Args:
+      points: List[tuple(float, float)]; Two dimension points
+      r: float; The search radius
+
+  Return:
+      A list of neighbors' index, return as the order of the input
+  """
+```
+
+```python
+def get_bbox_neighbors(bbox_list, expand=1.0, scale=1.0):
+  """
+  A utility function to search for bbox neighbors using r-tree
+
+  Args:
+      bbox_list: List[tuple(float, float, float, float)]; The minimum bounding box of any polygon
+              (minx, miny, maxx, maxy)
+      expand: float; The expand unit
+      scale: float; The scale fold number
+
+  Return:
+      A list of neighbors' index, return as the order of the input
+    """
+```
+

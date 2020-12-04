@@ -1,1 +1,6 @@
-from .neighborhood_analysis import CellCombs, get_bbox, get_point_neighbors, get_bbox_neighbors, comb_bootstrap
+from .neighborhood_analysis import (get_bbox,
+                                    get_bbox_neighbors,
+                                    get_point_neighbors,
+                                    comb_bootstrap,
+                                    CellCombs,
+                                    )
