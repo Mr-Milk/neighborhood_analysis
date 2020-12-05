@@ -1,7 +1,5 @@
 import numpy as np
-import neighborhood_analysis as na
 from neighborhood_analysis import CellCombs, get_bbox, get_point_neighbors, get_bbox_neighbors, comb_bootstrap
-
 from time import time
 
 types = [str(i) for i in range(30)]
@@ -30,7 +28,6 @@ print(f"search bbox neighbors used {(end-start):.5f}s")
 start = time()
 neighbors = get_point_neighbors(points, 5.0)
 end = time()
-print(np.asarray([len(i) for i in neighbors]).mean())
 print(f"search point neighbors used {(end-start):.5f}s")
 
 start = time()

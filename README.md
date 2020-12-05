@@ -2,16 +2,13 @@
 
 ![Build](https://github.com/Mr-Milk/neighborhood_analysis/workflows/Build/badge.svg) ![pypi](https://badgen.net/pypi/v/neighborhood_analysis)
 
-A python version of neighborhood analysis, purposed in [histocat](https://www.nature.com/articles/nmeth.4391). The analysis is 
-to profile cell-cell interaction.
+A python implementation of neighborhood analysis to profile cell-cell interaction using permutation test.
 
-The safe parallelism has been implemented, so no need to do multiprocessing yourself.
-
-(This is my first rust project, suggestions are welcomed.)
+The parallelism has been implemented, so no need to do multi-processing yourself.
 
 ## Installation
 
-The wheels are built for Windows, MacOS, Linux in 64bit, and Python version 3.5, 3.6, 3.7, 3.8, 3.9
+Prebuild wheels for: Windwos, MacOS and Linux in 64bit, on Python version 3.5, 3.6, 3.7, 3.8, 3.9
 
 Requirements: Python >= 3.5
 
@@ -23,7 +20,7 @@ Normally, there should be a compatible wheel for your system. Just run:
 pip install neighborhood_analysis
 ```
 
-If not, it will try to compile from source, you need to install dependencies.
+If not, it will try to compile from a source, you need to install dependencies.
 
 ```shell script
 # for windows
@@ -76,7 +73,9 @@ z_score = comb_bootstrap(X, Y, neighbors, ignore_self=True)
 
 ## Documentation
 
-### Neighborhood_analysis
+<details>
+<summary>Neighborhood analysis</summary>
+
 ```python
 class CellCombs:
 
@@ -111,8 +110,11 @@ class CellCombs:
           List of tuples, eg.(('a', 'b'), 1.0), the type a and type b has a relationship as association
       """
 ```
+</details>
 
-### Neighbors search utility functions
+
+<details>
+<summary>Neighbors search utility functions</summary>
 
 ```python
 def get_bbox(points_collections):
@@ -157,3 +159,6 @@ def get_bbox_neighbors(bbox_list, expand=1.0, scale=1.0):
     """
 ```
 
+</details>
+
+<br><br>
