@@ -24,8 +24,8 @@ pub fn count_neighbors<'a>(
                 storage.get_mut(&reverse_comb).unwrap().push(count);
             } else {
                 match storage.get_mut(&comb) {
-                    None => storage.get_mut(&reverse_comb).unwrap().push(count),
-                    Some(s) => s.push(count),
+                    None => storage.get_mut(&reverse_comb).unwrap().push(count * 2),
+                    Some(s) => s.push(count * 2),
                 };
             }
         }

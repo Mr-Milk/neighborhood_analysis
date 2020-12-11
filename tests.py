@@ -26,7 +26,7 @@ print(f"search bbox neighbors used {(end-start):.5f}s")
 
 
 start = time()
-neighbors = get_point_neighbors(points, 5.0)
+neighbors = get_point_neighbors(points, 10.0)
 end = time()
 print(f"search point neighbors used {(end-start):.5f}s")
 
