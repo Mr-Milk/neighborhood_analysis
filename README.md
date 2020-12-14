@@ -1,6 +1,13 @@
 # Neighborhood analysis
 
-![Build](https://github.com/Mr-Milk/neighborhood_analysis/workflows/Build/badge.svg) ![pypi](https://badgen.net/pypi/v/neighborhood_analysis)
+<p align="center">
+	<img src="https://img.shields.io/github/workflow/status/Mr-Milk/neighborhood_analysis/Build?style=for-the-badge&logo=github" alt="Build Status"/>
+  <img src="img/platform.svg" alt="Platform"/>
+	<br/><br/>
+	<img src="https://img.shields.io/pypi/v/neighborhood_analysis?style=for-the-badge" alt="PYPI"/>
+  <img src="img/python_version.svg" alt="Python version"/>
+</p>
+
 
 A python implementation of neighborhood analysis to profile cell-cell interaction using permutation test.
 
