@@ -24,7 +24,7 @@ classifier = [
 [dependencies]
 itertools = "0.9.0"
 counter = "0.5.2"
-rand = "0.7.3"
+rand = "0.8.1"
 kdbush = "0.2.0"
 rayon = "1.4.0"
 rstar = "0.8.2"
