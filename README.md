@@ -15,9 +15,9 @@ The parallelism has been implemented, so no need to do multi-processing yourself
 
 ## Installation
 
-Prebuild wheels for: Windwos, MacOS and Linux in 64bit, on Python version 3.5, 3.6, 3.7, 3.8, 3.9
+Prebuild wheels for: Windwos, MacOS and Linux in 64bit, on Python version 3.6, 3.7, 3.8, 3.9
 
-Requirements: Python >= 3.5
+Requirements: Python >= 3.6
 
 ### From pypi
 
