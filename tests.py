@@ -20,7 +20,7 @@ end = time()
 print(f"Get bbox used {(end-start):.5f}s")
 
 start = time()
-neighbors = get_bbox_neighbors(bbox, 2)
+neighbors = get_bbox_neighbors(bbox, 2, labels=[i for i in range(0, len(bbox))])
 end = time()
 print(f"search bbox neighbors used {(end-start):.5f}s")
 

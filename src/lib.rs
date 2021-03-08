@@ -66,7 +66,16 @@ pub fn get_bbox(points_collections: Vec<Vec<(f64, f64)>>) -> Vec<(f64, f64, f64,
 ///     A list of neighbors' index, return as the order of the input
 ///
 #[pyfunction]
-pub fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64) -> Vec<Vec<usize>> {
+pub fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64, labels: Option<Vec<usize>>) -> Vec<Vec<usize>> {
+    let mut has_labels = false;
+    let labels: Vec<usize> = match labels {
+        Some(data) => {
+            has_labels = true;
+            data
+        },
+        None => vec![0],
+    };
+
     let tree = KDBush::create(points.to_owned(), kdbush::DEFAULT_NODE_SIZE); // make an index
     let result: HashMap<usize, Vec<usize>> = points
         .par_iter()
@@ -80,8 +89,16 @@ pub fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64) -> Vec<Vec<usize>> {
 
     let count = points.len();
     let mut neighbors = vec![];
-    for i in 0..count {
-        neighbors.push(result.get(&i).unwrap().clone())
+    if has_labels {
+        for i in 0..count {
+            neighbors.push(result.get(&i).unwrap().clone().iter().map(
+                |t| {labels[*t]}
+            ).collect())
+        }
+    } else {
+        for i in 0..count {
+            neighbors.push(result.get(&i).unwrap().clone())
+        }
     }
 
     neighbors
@@ -135,6 +152,7 @@ pub fn get_bbox_neighbors(
     bbox_list: Vec<(f64, f64, f64, f64)>,
     expand: Option<f64>,
     scale: Option<f64>,
+    labels: Option<Vec<usize>>
 ) -> Vec<Vec<usize>> {
     let mut expand_na: bool = true;
     let expand: f64 = match expand {
@@ -148,6 +166,15 @@ pub fn get_bbox_neighbors(
     let scale: f64 = match scale {
         Some(data) => data,
         None => 1.0,
+    };
+
+    let mut has_labels = false;
+    let labels: Vec<usize> = match labels {
+        Some(data) => {
+            has_labels = true;
+            data
+        },
+        None => vec![0],
     };
 
     let aabb: Vec<Rect> = bbox_list
@@ -195,8 +222,16 @@ pub fn get_bbox_neighbors(
 
     let count = bbox_list.len();
     let mut neighbors = vec![];
-    for i in 0..count {
-        neighbors.push(result.get(&i).unwrap().clone())
+    if has_labels {
+        for i in 0..count {
+            neighbors.push(result.get(&i).unwrap().clone().iter().map(
+                |t| {labels[*t]}
+            ).collect())
+        }
+    } else {
+        for i in 0..count {
+            neighbors.push(result.get(&i).unwrap().clone())
+        }
     }
 
     neighbors
