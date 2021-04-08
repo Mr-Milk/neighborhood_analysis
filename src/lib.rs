@@ -7,6 +7,7 @@ use rand::thread_rng;
 use std::collections::HashMap;
 
 use kdbush::KDBush;
+use counter::Counter;
 use rayon::prelude::*;
 use rstar::{RTree, RTreeObject, AABB};
 use spade::BoundingRect;
@@ -23,8 +24,41 @@ fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(get_bbox_neighbors))?;
     m.add_class::<CellCombs>()?;
     m.add_wrapped(wrap_pyfunction!(comb_bootstrap))?;
+    m.add_wrapped(wrap_pyfunction!(neighbor_components))?;
     Ok(())
 }
+
+
+
+#[pyfunction]
+pub fn neighbor_components(neighbors: HashMap<usize, Vec<usize>>, types: HashMap<usize, &str>)
+    -> (Vec<usize>, Vec<&str>, Vec<Vec<usize>>) {
+
+    let mut uni_types: HashMap<&str, i64> = HashMap::new();
+    for (_, t) in &types {
+        uni_types.entry(*t).or_insert(0);
+    }
+    let uni_types: Vec<&str> = uni_types.keys().map(|k| *k).collect_vec();
+    let mut cent_order: Vec<usize> = vec![];
+    let result: Vec<Vec<usize>> = neighbors.iter().map(|(cent, neigh)| {
+        let count: HashMap<&&str, usize> = neigh.iter().map(|i| &types[i]).collect::<Counter<_>>().into_map();
+        let mut result_v: Vec<usize> = vec![];
+        for t in &uni_types {
+            let v = match count.get(t) {
+                Some(v) => *v,
+                None => {0}
+            };
+            result_v.push(v);
+        }
+        cent_order.push(*cent);
+        result_v
+        }).collect();
+
+    (cent_order, uni_types, result)
+
+}
+
+
 
 /// get_bbox(points_collections)
 /// --

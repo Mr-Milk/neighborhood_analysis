@@ -1,5 +1,6 @@
 from typing import List, Tuple, Dict, Optional
 
+def neighbor_components(neighbors: Dict[int, List[int]], types: Dict[int, str]) -> (List[int], List[str], List[List[int]]): ...
 
 def get_bbox(points_collections: List[List[Tuple[float, float]]]) -> List[Tuple[float, float, float, float]]: ...
 
