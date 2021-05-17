@@ -1,4 +1,5 @@
 mod utils;
+
 use utils::*;
 
 use itertools::Itertools;
@@ -29,11 +30,9 @@ fn neighborhood_analysis(_py: Python, m: &PyModule) -> PyResult<()> {
 }
 
 
-
 #[pyfunction]
 pub fn neighbor_components(neighbors: HashMap<usize, Vec<usize>>, types: HashMap<usize, &str>)
-    -> (Vec<usize>, Vec<&str>, Vec<Vec<usize>>) {
-
+                           -> (Vec<usize>, Vec<&str>, Vec<Vec<usize>>) {
     let mut uni_types: HashMap<&str, i64> = HashMap::new();
     for (_, t) in &types {
         uni_types.entry(*t).or_insert(0);
@@ -46,18 +45,16 @@ pub fn neighbor_components(neighbors: HashMap<usize, Vec<usize>>, types: HashMap
         for t in &uni_types {
             let v = match count.get(t) {
                 Some(v) => *v,
-                None => {0}
+                None => { 0 }
             };
             result_v.push(v);
         }
         cent_order.push(*cent);
         result_v
-        }).collect();
+    }).collect();
 
     (cent_order, uni_types, result)
-
 }
-
 
 
 /// get_bbox(points_collections)
@@ -70,7 +67,6 @@ pub fn neighbor_components(neighbors: HashMap<usize, Vec<usize>>, types: HashMap
 ///
 /// Return:
 ///     A list of bounding box
-
 #[pyfunction]
 pub fn get_bbox(points_collections: Vec<Vec<(f64, f64)>>) -> Vec<(f64, f64, f64, f64)> {
     let bbox: Vec<(f64, f64, f64, f64)> = points_collections
@@ -106,7 +102,7 @@ pub fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64, labels: Option<Vec<u
         Some(data) => {
             has_labels = true;
             data
-        },
+        }
         None => vec![0],
     };
 
@@ -126,7 +122,7 @@ pub fn get_point_neighbors(points: Vec<(f64, f64)>, r: f64, labels: Option<Vec<u
     if has_labels {
         for i in 0..count {
             neighbors.push(result.get(&i).unwrap().clone().iter().map(
-                |t| {labels[*t]}
+                |t| { labels[*t] }
             ).collect())
         }
     } else {
@@ -186,7 +182,7 @@ pub fn get_bbox_neighbors(
     bbox_list: Vec<(f64, f64, f64, f64)>,
     expand: Option<f64>,
     scale: Option<f64>,
-    labels: Option<Vec<usize>>
+    labels: Option<Vec<usize>>,
 ) -> Vec<Vec<usize>> {
     let mut expand_na: bool = true;
     let expand: f64 = match expand {
@@ -207,7 +203,7 @@ pub fn get_bbox_neighbors(
         Some(data) => {
             has_labels = true;
             data
-        },
+        }
         None => vec![0],
     };
 
@@ -259,7 +255,7 @@ pub fn get_bbox_neighbors(
     if has_labels {
         for i in 0..count {
             neighbors.push(result.get(&i).unwrap().clone().iter().map(
-                |t| {labels[*t]}
+                |t| { labels[*t] }
             ).collect())
         }
     } else {
@@ -303,7 +299,7 @@ fn comb_bootstrap(
         Err(_) => {
             return Err(PyTypeError::new_err(
                 "Can't resolve `x_status`, should be list of bool.",
-            ))
+            ));
         }
     };
 
@@ -312,7 +308,7 @@ fn comb_bootstrap(
         Err(_) => {
             return Err(PyTypeError::new_err(
                 "Can't resolve `y_status`, should be list of bool.",
-            ))
+            ));
         }
     };
 
@@ -321,7 +317,7 @@ fn comb_bootstrap(
         Err(_) => {
             return Err(PyTypeError::new_err(
                 "Can't resolve `neighbors`, should be a dict.",
-            ))
+            ));
         }
     };
 
@@ -381,7 +377,7 @@ impl CellCombs {
             Err(_) => {
                 return Err(PyTypeError::new_err(
                     "Can't resolve `types`, should be list of string.",
-                ))
+                ));
             }
         };
 
@@ -447,7 +443,7 @@ impl CellCombs {
             Err(_) => {
                 return Err(PyTypeError::new_err(
                     "Can't resolve `types`, should be list of string.",
-                ))
+                ));
             }
         };
         let neighbors_data: Vec<Vec<usize>> = match neighbors.extract(py) {
@@ -455,7 +451,7 @@ impl CellCombs {
             Err(_) => {
                 return Err(PyTypeError::new_err(
                     "Can't resolve `neighbors`, should be a list.",
-                ))
+                ));
             }
         };
 
