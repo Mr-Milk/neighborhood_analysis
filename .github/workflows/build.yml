@@ -135,10 +135,6 @@ jobs:
           toolchain: stable
           profile: minimal
           default: true
-      - name: Build
-        run: cargo build --release
-      - name: Tests
-        run: cargo test --no-default-features
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -159,6 +155,7 @@ jobs:
 
   list_dist:
     name: List wheels and sdist
+    needs: [macos, windows, linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
