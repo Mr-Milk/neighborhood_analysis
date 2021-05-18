@@ -160,12 +160,12 @@ jobs:
           name: wheels
       - name: List dists
         run: |
-          ls
+          ls -R
       - name: Github Release
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          files: *
+          files: ./dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: PyPi publish
