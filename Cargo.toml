@@ -27,7 +27,7 @@ counter = "0.5.2"
 rand = "0.8.3"
 kdbush = "0.2.0"
 rayon = "1.4.0"
-rstar = "0.8.2"
+rstar = "0.9.1"
 spade = "1.8.2"
 
 [profile.dev]
