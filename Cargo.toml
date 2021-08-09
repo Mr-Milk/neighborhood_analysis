@@ -38,7 +38,7 @@ name = "neighborhood_analysis"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.13.1"
+version = "0.14.2"
 features = ["extension-module"]
 
 [target.x86_64-apple-darwin]
