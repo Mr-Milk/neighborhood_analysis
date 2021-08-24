@@ -1,5 +1,7 @@
 # Neighborhood analysis
 
+> This package is no longer maintained, the functionalities can be found in [spatialtis_core](https://github.com/Mr-Milk/spatialtis-core)
+
 <p align="center">
 	<img src="https://img.shields.io/github/workflow/status/Mr-Milk/neighborhood_analysis/Build?style=for-the-badge&logo=github" alt="Build Status"/>
   <img src="img/platform.svg" alt="Platform"/>
